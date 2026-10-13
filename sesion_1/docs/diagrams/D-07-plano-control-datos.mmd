@@ -1,0 +1,11 @@
+flowchart TB
+    subgraph Control["Plano de control (configurar y gobernar)"]
+        ADM["Administradores<br/>roles restringidos + auditoría"] --> CFG["Despliegue de modelos · versiones de prompts<br/>políticas · cuotas · identidades"]
+    end
+    subgraph Datos["Plano de datos (transportar solicitudes)"]
+        U["Usuario"] --> GW["Gateway"] --> BE["Backend"] --> SV["Serving"]
+        BE --> VS[("Vector store")]
+    end
+    CFG -. "configura" .-> GW
+    CFG -. "configura" .-> BE
+    CFG -. "configura" .-> SV

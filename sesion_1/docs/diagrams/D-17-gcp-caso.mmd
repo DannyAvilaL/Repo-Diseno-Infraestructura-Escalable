@@ -1,0 +1,10 @@
+flowchart LR
+    U["Usuario"] --> IdP["Identidad institucional (OIDC)"]
+    U --> LB["Cloud Load Balancing + Cloud Armor"] --> CR["Cloud Run<br/>backend multizona"]
+    CR --> GP["Gemini Enterprise Agent Platform<br/>Gemini"]
+    CR --> AE["Agent Engine / Runtime<br/>agente ADK (fase 2)"]
+    CR --> VS[("Vector Search o AlloyDB/pgvector")]
+    CR --> SM["Secret Manager"]
+    CR -.-> MA["Model Armor"]
+    CR -.-> OBS["Cloud Logging / Monitoring / Trace"]
+    GCS[("Cloud Storage<br/>documentos")] -. "ingesta" .-> VS

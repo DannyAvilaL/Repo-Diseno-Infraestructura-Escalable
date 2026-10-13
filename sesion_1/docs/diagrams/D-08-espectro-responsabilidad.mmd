@@ -1,0 +1,4 @@
+flowchart LR
+    VM["VM con GPU<br/>la organización opera todo"] --> K8S["Kubernetes con GPU<br/>motor, escalado, red"] --> SL["Contenedores serverless<br/>imagen y configuración"] --> API["API de modelos (MaaS)<br/>prompt, cuotas, región"] --> AG["Runtime gestionado de agentes<br/>lógica, herramientas, políticas"]
+    VM -. "más control" .- AG
+    AG -. "menor costo operativo" .- VM

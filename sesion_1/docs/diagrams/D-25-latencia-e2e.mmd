@@ -1,0 +1,11 @@
+gantt
+    title Desglose de latencia end-to-end (ilustrativo, sin escala real)
+    dateFormat X
+    axisFormat %s
+    section Solicitud
+    Red y gateway          :0, 1
+    Recuperación RAG       :1, 3
+    Cola del scheduler     :3, 4
+    Prefill (≈ TTFT)       :crit, 4, 6
+    Decode (TPOT × tokens) :6, 16
+    Posprocesamiento       :16, 17

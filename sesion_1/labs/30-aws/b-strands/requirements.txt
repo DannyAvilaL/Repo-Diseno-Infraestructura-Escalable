@@ -1,0 +1,3 @@
+# Versiones validadas el 2026-10-13 (construcción del agente; sin llamada a Bedrock).
+strands-agents==1.60.0
+python-dotenv==1.2.4

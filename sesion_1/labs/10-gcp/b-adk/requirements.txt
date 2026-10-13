@@ -1,0 +1,4 @@
+# Versiones validadas el 2026-10-13 (construcción del agente; sin llamada a Gemini).
+google-adk==2.12.0
+python-dotenv==1.2.4
+# FastAPI y Uvicorn llegan como dependencias de google-adk (no fijarlos: generan conflicto).

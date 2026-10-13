@@ -1,0 +1,10 @@
+flowchart LR
+    U["Usuario"] --> COG["Cognito / OIDC institucional"]
+    U --> APIGW["API Gateway + WAF"] --> ECS["ECS en Fargate<br/>backend multizona"]
+    ECS --> BR["Amazon Bedrock<br/>modelos"]
+    ECS --> AC["Bedrock AgentCore<br/>Runtime, Identity, Gateway (fase 2)"]
+    ECS --> KB[("Knowledge Bases<br/>S3 Vectors u OpenSearch")]
+    ECS --> SEC["Secrets Manager + roles de IAM"]
+    ECS -.-> GRD["Bedrock Guardrails"]
+    ECS -.-> CW["CloudWatch + AgentCore Observability"]
+    S3[("S3<br/>documentos")] -. "ingesta" .-> KB

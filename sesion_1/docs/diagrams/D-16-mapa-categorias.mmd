@@ -1,0 +1,39 @@
+flowchart LR
+    subgraph Cat["Categoría"]
+        c1["Plataforma de modelos"]
+        c2["Runtime de agentes"]
+        c3["SDK de agentes"]
+        c4["Contenedores serverless"]
+        c5["Kubernetes"]
+        c6["Vectores / RAG"]
+    end
+    subgraph AWS
+        a1["Amazon Bedrock"]
+        a2["Bedrock AgentCore"]
+        a3["Strands Agents"]
+        a4["ECS en Fargate"]
+        a5["EKS"]
+        a6["Knowledge Bases + S3 Vectors"]
+    end
+    subgraph Azure
+        z1["Microsoft Foundry"]
+        z2["Foundry Agent Service"]
+        z3["Agent Framework"]
+        z4["Container Apps"]
+        z5["AKS"]
+        z6["Azure AI Search"]
+    end
+    subgraph GCP["Google Cloud"]
+        g1["Gemini Enterprise Agent Platform"]
+        g2["Agent Engine / Runtime"]
+        g3["ADK"]
+        g4["Cloud Run"]
+        g5["GKE"]
+        g6["Vector Search / pgvector"]
+    end
+    c1 --- a1 --- z1 --- g1
+    c2 --- a2 --- z2 --- g2
+    c3 --- a3 --- z3 --- g3
+    c4 --- a4 --- z4 --- g4
+    c5 --- a5 --- z5 --- g5
+    c6 --- a6 --- z6 --- g6

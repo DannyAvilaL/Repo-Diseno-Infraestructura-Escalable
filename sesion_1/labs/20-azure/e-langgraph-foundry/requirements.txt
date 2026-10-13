@@ -1,0 +1,5 @@
+# LangGraph es un framework externo (LangChain). Versiones validadas el 2026-10-13 contra simulador.
+langgraph==1.2.15
+langchain-openai==1.7.1
+azure-identity==1.26.0
+python-dotenv==1.2.4

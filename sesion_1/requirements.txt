@@ -1,0 +1,3 @@
+# Dependencias del laboratorio principal (LOC-01). Cada laboratorio cloud
+# declara las suyas en su propia carpeta para no instalar SDKs innecesarios.
+-r labs/00-local-ollama/backend/requirements.txt

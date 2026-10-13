@@ -1,0 +1,13 @@
+gantt
+    title Batching estático vs. continuo (pasos de decode, ilustrativo)
+    dateFormat X
+    axisFormat %s
+    section Estático
+    Solicitud A (larga)     :a1, 0, 8
+    Solicitud B (corta)     :a2, 0, 3
+    B espera al lote        :crit, a3, 3, 8
+    Solicitud C (espera)    :a4, 8, 12
+    section Continuo
+    Solicitud A (larga)     :b1, 0, 8
+    Solicitud B (corta)     :b2, 0, 3
+    Solicitud C entra al liberarse B :b3, 3, 7

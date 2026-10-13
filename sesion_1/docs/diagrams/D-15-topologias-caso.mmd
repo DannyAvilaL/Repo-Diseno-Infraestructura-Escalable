@@ -1,0 +1,9 @@
+flowchart TB
+    subgraph A["A · Gestionada"]
+        A1["Contenedores serverless<br/>backend multizona"] --> A2["API de modelos gestionada<br/>endpoint privado"]
+        A1 --> A3[("Búsqueda vectorial gestionada")]
+    end
+    subgraph B["B · Self-hosted"]
+        B1["Kubernetes<br/>backend"] --> B2["Motor de serving<br/>GPU en 2 zonas"]
+        B1 --> B3[("pgvector / vector store<br/>red privada")]
+    end

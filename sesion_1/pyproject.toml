@@ -1,0 +1,17 @@
+[project]
+name = "llm-infra-escalable"
+version = "0.1.0"
+description = "Materiales y laboratorios del curso Diseño de Infraestructura Escalable para LLMs"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+ignore = ["S101"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"

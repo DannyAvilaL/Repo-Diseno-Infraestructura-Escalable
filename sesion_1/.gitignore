@@ -1,0 +1,38 @@
+# Secretos y configuración local
+.env
+*.env
+!.env.example
+*.pem
+*.key
+credentials*.json
+service-account*.json
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+*.egg-info/
+
+# Node
+node_modules/
+dist/
+
+# Infraestructura
+.terraform/
+*.tfstate
+*.tfstate.*
+.azure/
+
+# Resultados locales
+*.csv
+!docs/**/*.csv
+*.log
+.DS_Store
+
+# Variables de Terraform con datos reales
+*.tfvars
+!*.tfvars.example

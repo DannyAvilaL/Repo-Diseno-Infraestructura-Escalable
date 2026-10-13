@@ -1,0 +1,5 @@
+flowchart LR
+    R["Solicitud"] --> P["Perímetro<br/>WAF, auth, rate limit"] --> E["Entrada<br/>guardrails, longitud"] --> C["Contexto<br/>permisos, procedencia"] --> M["Modelo y agente<br/>mínimo privilegio, aprobación humana"] --> S["Salida<br/>guardrails, validación"] --> RESP["Respuesta"]
+    P -.-> O["Operación: logging seguro, trazas, auditoría, respuesta a incidentes"]
+    M -.-> O
+    S -.-> O

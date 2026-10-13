@@ -1,0 +1,13 @@
+sequenceDiagram
+    actor A as Atacante
+    participant D as Documento en el corpus
+    actor U as Usuario legítimo
+    participant B as Backend RAG
+    participant M as Modelo
+    A->>D: Inserta texto con instrucciones ocultas
+    U->>B: Pregunta normal
+    B->>D: Recupera fragmentos relevantes
+    D-->>B: Fragmento con instrucción oculta
+    B->>M: Prompt = instrucciones + pregunta + fragmento
+    M-->>B: Respuesta influida por el atacante
+    Note over B,M: Controles: procedencia, delimitación de datos,<br/>guardrails de salida, herramientas de mínimo privilegio
