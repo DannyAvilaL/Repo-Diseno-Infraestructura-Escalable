@@ -8,13 +8,10 @@ Capítulo 1 · Fundamentos de Infraestructura para LLMs · 180 minutos
 
 | Archivo | Para quién | Contenido |
 | --- | --- | --- |
-| [`slides/S01-Arquitecturas-Base-LLM.pptx`](slides/S01-Arquitecturas-Base-LLM.pptx) | Docente y estudiantes | 61 diapositivas (55 de contenido + 6 separadores de unidad) con notas del expositor |
-| [`slides/build_deck.js`](slides/build_deck.js) | Mantenimiento | Genera la presentación (`make deck`) |
 | [`marco-teorico.md`](marco-teorico.md) | Estudiantes | Fuente única de contenido de las seis unidades, con diagramas Mermaid |
 | [`guia-estudiante.md`](guia-estudiante.md) | Estudiantes | Resultados, actividades, ejercicios, autoevaluación y lecturas |
 | [`caso-universitario/`](caso-universitario) | Estudiantes | Enunciado del caso transversal y plantilla del taller |
 | [`evaluacion/`](evaluacion) | Estudiantes | Preguntas y rúbrica (sin respuestas) |
-| [`planeacion.md`](planeacion.md) | Docente | Planeación académica (Fase 1): alcance, agenda, trazabilidad |
 
 La guía docente, el solucionario y las soluciones de referencia por nube están en el repositorio privado `llm-infra-escalable-docente`.
 
