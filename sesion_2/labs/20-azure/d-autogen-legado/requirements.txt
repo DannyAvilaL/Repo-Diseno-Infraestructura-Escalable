@@ -1,0 +1,5 @@
+# AutoGen está en modo mantenimiento. Versiones validadas el 2026-10-13 contra simulador.
+autogen-agentchat==0.7.5
+autogen-ext[openai,azure]==0.7.5
+azure-identity==1.26.0
+python-dotenv==1.2.4

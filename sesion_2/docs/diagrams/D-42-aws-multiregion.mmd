@@ -1,0 +1,15 @@
+%% D-42 · Caso en AWS (diseño de referencia, no validado en una cuenta)
+flowchart LR
+    U["Usuarios · Cognito"] --> R53["Route 53<br/>failover con health checks"]
+    subgraph USE1["us-east-1"]
+        APIGW1["API Gateway"] --> ECS1["ECS Fargate · backend"]
+        ECS1 --> BR1["Bedrock · perfil us. (CRIS geográfico)"]
+        ECS1 --> DDB[("DynamoDB global tables")]
+        EVB["EventBridge Scheduler"] --> BJ["Bedrock batch inference"] --> S3[("S3")]
+    end
+    subgraph USW2["us-west-2"]
+        APIGW2["API Gateway"] --> ECS2["ECS Fargate · backend"]
+        ECS2 --> BR2["Bedrock · perfil us."]
+    end
+    R53 --> APIGW1
+    R53 -. failover .-> APIGW2

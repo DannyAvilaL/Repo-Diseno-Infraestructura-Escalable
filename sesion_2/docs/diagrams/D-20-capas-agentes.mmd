@@ -1,0 +1,6 @@
+flowchart TB
+    C["Código del agente<br/>SDK o framework: Strands, Agent Framework, ADK, LangGraph"]
+    R["Runtime de ejecución<br/>gestionado (AgentCore, Foundry Agent Service, Agent Engine) o propio (contenedor)"]
+    M["Servicio de modelos<br/>Bedrock, Foundry Models, Gemini, Ollama local"]
+    C -->|"se despliega en"| R
+    C -->|"invoca"| M

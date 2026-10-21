@@ -1,0 +1,7 @@
+%% D-31 · Coexistencia de cargas online y batch (ADR-0006)
+flowchart LR
+    U["Usuarios<br/>(online)"] -->|"prioridad alta"| AC["Control de admisión<br/>prioridad online · límite de concurrencia del lote"]
+    L["Lote PQRS<br/>(batch nocturno)"] -->|"cede capacidad si hay<br/>tráfico interactivo"| AC
+    AC --> CAP[("Capacidad compartida<br/>cuota o GPU")]
+    L -. "alternativa gestionada" .-> BQ["Servicio batch del proveedor<br/>cuota de tokens encolados separada (Azure)"]
+    CAP --> OBS["Observabilidad separada<br/>SLI online y SLI batch"]

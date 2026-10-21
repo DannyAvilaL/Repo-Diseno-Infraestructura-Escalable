@@ -1,0 +1,7 @@
+flowchart TB
+    U["Usuario"] --> A["Agente (LLM en bucle)"]
+    A -->|"decide herramienta"| T["Herramienta<br/>identidad de mínimo privilegio"]
+    T -->|"observación"| A
+    A --> MEM[("Memoria de sesión")]
+    A -->|"respuesta final"| U
+    T -. "límite de confianza" .- EXT["Sistema académico<br/>(solo lectura)"]

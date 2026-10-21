@@ -1,0 +1,68 @@
+# Ollama dentro del clúster: solo accesible por el backend (NetworkPolicy).
+# Sin GPU por defecto. Para GPU NVIDIA, añada el límite nvidia.com/gpu: 1 y un
+# nodeSelector/toleration hacia el pool de GPU (requiere el device plugin).
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: ollama-models
+  namespace: asistente
+spec:
+  accessModes: ["ReadWriteOnce"]
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: asistente
+  labels: {app: ollama}
+spec:
+  replicas: 1
+  strategy: {type: Recreate}   # el PVC ReadWriteOnce no admite dos pods a la vez
+  selector:
+    matchLabels: {app: ollama}
+  template:
+    metadata:
+      labels: {app: ollama}
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      containers:
+        - name: ollama
+          image: ollama/ollama:0.40.3   # versión fijada; verifique la vigente
+          env:
+            - {name: OLLAMA_HOST, value: "0.0.0.0:11434"}   # dentro del pod; el acceso lo limita la NetworkPolicy
+            - {name: HOME, value: /models}
+            - {name: OLLAMA_MODELS, value: /models/.ollama/models}
+          ports:
+            - {containerPort: 11434, name: http}
+          resources:
+            requests: {cpu: "2", memory: 4Gi}
+            limits: {memory: 8Gi}
+          readinessProbe:
+            httpGet: {path: /api/tags, port: http}
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+          volumeMounts:
+            - {name: models, mountPath: /models}
+      volumes:
+        - name: models
+          persistentVolumeClaim: {claimName: ollama-models}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: asistente
+spec:
+  type: ClusterIP
+  selector: {app: ollama}
+  ports:
+    - {name: http, port: 11434, targetPort: http}

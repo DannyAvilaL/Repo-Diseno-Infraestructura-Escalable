@@ -1,0 +1,11 @@
+%% D-43 · Laboratorio LOC-02 (labs/01-local-gateway)
+flowchart LR
+    UI["React + Vite<br/>127.0.0.1:5173"] --> GW
+    LT["failover_test.py"] --> GW
+    subgraph GW["Gateway FastAPI · 127.0.0.1:8080"]
+        R["Router"] --- CB["Circuit breaker"]
+        R --- HC["Health checks"]
+        BQ["Procesador batch"] --> R
+    end
+    R --> A["region-a · 9001"]
+    R --> B["region-b · 9002"]

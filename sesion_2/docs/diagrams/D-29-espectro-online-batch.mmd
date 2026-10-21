@@ -1,0 +1,16 @@
+%% D-29 · Espectro de patrones de inferencia (Sesión 2, Unidad A)
+flowchart LR
+    subgraph ON["Online · alguien espera (SLO de latencia)"]
+        S1["Síncrono<br/>request/response"]
+        S2["Streaming<br/>SSE o WebSocket"]
+    end
+    subgraph AS["Asíncrono · espera el resultado (minutos)"]
+        A1["Cola + workers<br/>notificación al terminar"]
+        A2["Micro-batch<br/>cada N s o N ítems"]
+    end
+    subgraph BA["Batch · nadie espera (SLO de plazo)"]
+        B1["Archivo JSONL<br/>trabajo gestionado · 24 h"]
+    end
+    ON --> AS --> BA
+    ON -.->|"TTFT, p95"| M1(("SLI"))
+    BA -.->|"tiempo hasta completar,<br/>% ítems exitosos, costo por 1.000"| M1

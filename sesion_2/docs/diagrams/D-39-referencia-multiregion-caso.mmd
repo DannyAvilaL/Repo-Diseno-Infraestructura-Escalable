@@ -1,0 +1,22 @@
+%% D-39 · Topología de referencia multi-región para el caso universitario (neutral)
+flowchart LR
+    U["Estudiantes y personal<br/>OIDC"] --> GLB["Balanceador global + WAF"]
+    subgraph R1["Región primaria"]
+        GW1["Gateway de IA"] --> BE1["Backend del asistente"]
+        BE1 --> M1["Endpoint de modelo<br/>(gestionado)"]
+        BE1 --> V1[("Índice vectorial")]
+        BE1 --> DB1[("Conversaciones")]
+        SCH["Planificador nocturno"] --> BJ["Trabajo batch PQRS"]
+        BJ --> ST1[("Almacenamiento<br/>entrada / salida")]
+    end
+    subgraph R2["Región secundaria · warm standby"]
+        GW2["Gateway de IA"] --> BE2["Backend"]
+        BE2 --> M2["Endpoint de modelo"]
+        BE2 --> V2[("Índice reconstruible")]
+        BE2 --> DB2[("Réplica de conversaciones")]
+    end
+    GLB --> GW1
+    GLB -. "failover" .-> GW2
+    DB1 -. "replicación" .-> DB2
+    GIT["Git + IaC<br/>prompts, guardrails, versión del modelo"] --> R1
+    GIT --> R2

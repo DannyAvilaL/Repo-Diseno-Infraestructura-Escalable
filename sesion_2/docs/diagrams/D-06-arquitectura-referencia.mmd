@@ -1,0 +1,35 @@
+flowchart LR
+    subgraph Clientes
+        W["Web / móvil<br/>React"]
+    end
+    subgraph Borde
+        IdP["Proveedor de identidad<br/>OIDC / SSO"]
+        GW["API Gateway<br/>autenticación, cuotas, WAF"]
+    end
+    subgraph Aplicación
+        BE["Backend / orquestador<br/>FastAPI"]
+        GR["Guardrails<br/>entrada y salida"]
+    end
+    subgraph Inferencia
+        MG["Gateway de modelos<br/>enrutamiento, reintentos"]
+        SV["Serving<br/>API gestionada o motor propio"]
+    end
+    subgraph Datos
+        VS[("Vector store")]
+        OS[("Almacenamiento de objetos<br/>documentos fuente")]
+        ST[("Estado de sesión")]
+    end
+    subgraph Transversal
+        OB["Observabilidad<br/>logs, métricas, trazas"]
+        SEC["Gestión de secretos e identidades"]
+    end
+    W --> IdP
+    W --> GW --> BE
+    BE --> GR
+    BE --> MG --> SV
+    BE --> VS
+    BE --> ST
+    OS -. ingesta .-> VS
+    BE -.-> OB
+    SV -.-> OB
+    BE -.-> SEC

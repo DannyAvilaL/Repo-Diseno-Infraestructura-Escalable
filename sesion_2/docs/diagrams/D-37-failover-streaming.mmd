@@ -1,0 +1,16 @@
+%% D-37 · Conmutación solo antes del primer token
+sequenceDiagram
+    autonumber
+    participant C as Cliente
+    participant G as Gateway
+    participant A as Región A
+    participant B as Región B
+    C->>G: POST /v1/chat/stream
+    G->>A: intento 1
+    A-->>G: 503 o timeout antes del primer byte
+    Note over G: circuit breaker registra la falla
+    G->>B: intento 2
+    B-->>G: tokens (SSE)
+    G-->>C: event: region {name: B, failover: true}
+    G-->>C: event: token ... event: metrics ... event: done
+    Note over G,B: si B fallara después del primer token,<br/>se envía event: error y NO se conmuta

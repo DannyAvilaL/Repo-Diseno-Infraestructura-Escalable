@@ -1,0 +1,26 @@
+sequenceDiagram
+    participant C as Cliente
+    participant B as Backend
+    participant Q as Cola
+    participant W as Worker
+    participant M as Modelo
+    Note over C,M: Síncrono
+    C->>B: Solicitud
+    B->>M: Prompt
+    M-->>B: Respuesta completa
+    B-->>C: Respuesta
+    Note over C,M: Streaming (SSE)
+    C->>B: Solicitud
+    B->>M: Prompt
+    loop por token
+        M-->>B: token
+        B-->>C: event: token
+    end
+    Note over C,M: Asíncrono con cola / event-driven
+    C->>B: Solicitud o evento (p. ej. documento publicado)
+    B->>Q: Encolar tarea
+    B-->>C: 202 Aceptado + id
+    Q->>W: Tarea
+    W->>M: Prompt
+    M-->>W: Resultado
+    W-->>C: Notificación o consulta por id

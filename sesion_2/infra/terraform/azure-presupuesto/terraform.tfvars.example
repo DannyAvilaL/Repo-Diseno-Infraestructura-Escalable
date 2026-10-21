@@ -1,0 +1,6 @@
+subscription_id         = "00000000-0000-0000-0000-000000000000"
+usuario                 = "jperez"
+location                = "eastus2"
+presupuesto_mensual_usd = 20
+correo_alertas          = "estudiante@universidad.edu.co"
+inicio_presupuesto      = "2026-10-01T00:00:00Z"

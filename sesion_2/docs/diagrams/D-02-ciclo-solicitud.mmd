@@ -1,0 +1,21 @@
+sequenceDiagram
+    autonumber
+    actor U as Usuario
+    participant G as API Gateway
+    participant B as Backend / orquestador
+    participant S as Servidor de inferencia
+    participant O as Observabilidad
+    U->>G: Pregunta (HTTPS + token de identidad)
+    G->>G: Autenticación, rate limiting
+    G->>B: Solicitud autorizada
+    B->>B: Construye prompt (instrucciones + historial + contexto)
+    B->>S: Prompt
+    S->>S: Tokenización y cola del scheduler
+    S->>S: Prefill: procesa todos los tokens de entrada
+    S-->>B: Primer token (marca TTFT)
+    loop Decode: un token por paso
+        S-->>B: Siguiente token
+        B-->>U: Streaming del fragmento
+    end
+    B->>B: Validación de salida (guardrails)
+    B->>O: Trazas, métricas y tokens consumidos

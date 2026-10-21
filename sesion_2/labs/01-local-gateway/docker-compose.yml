@@ -1,0 +1,44 @@
+# Laboratorio LOC-02. Puertos publicados SOLO en 127.0.0.1.
+# Las dos "regiones" son procesos simulados; en la nube serían endpoints en
+# regiones distintas, con dominios de falla independientes.
+x-region: &region
+  build: .
+  healthcheck:
+    test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:9000/v1/models')"]
+    interval: 10s
+    timeout: 3s
+    retries: 5
+
+services:
+  region-a:
+    <<: *region
+    command: ["python", "scripts/mock_region.py", "--name", "region-a", "--port", "9000", "--host", "0.0.0.0"]
+    ports:
+      - "127.0.0.1:9001:9000"
+
+  region-b:
+    <<: *region
+    command: ["python", "scripts/mock_region.py", "--name", "region-b", "--port", "9000", "--host", "0.0.0.0"]
+    ports:
+      - "127.0.0.1:9002:9000"
+
+  gateway:
+    build: .
+    environment:
+      APP_REGIONS: >-
+        [{"name":"region-a","base_url":"http://region-a:9000/v1","model":"simulado","priority":1,"sim_admin_url":"http://127.0.0.1:9001/admin/state"},
+         {"name":"region-b","base_url":"http://region-b:9000/v1","model":"simulado","priority":2,"sim_admin_url":"http://127.0.0.1:9002/admin/state"}]
+      APP_ROUTING: priority
+      APP_BATCH_DIR: /srv/data/batches
+    volumes:
+      - batches:/srv/data
+    ports:
+      - "127.0.0.1:8080:8080"
+    depends_on:
+      region-a:
+        condition: service_healthy
+      region-b:
+        condition: service_healthy
+
+volumes:
+  batches:

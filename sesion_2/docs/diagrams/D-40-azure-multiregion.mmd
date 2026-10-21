@@ -1,0 +1,17 @@
+%% D-40 · Caso en Azure (diseño de referencia, no validado en una suscripción)
+flowchart LR
+    U["Usuarios · Entra ID"] --> AFD["Azure Front Door + WAF"]
+    subgraph EUS2["East US 2"]
+        APIM1["API Management<br/>pool por prioridad + circuit breaker"] --> APP1["Container Apps<br/>backend"]
+        APIM1 --> F1["Foundry · gpt-5-mini<br/>Global o Data Zone Standard"]
+        APP1 --> AIS1[("AI Search")]
+        APP1 --> COS[("Cosmos DB<br/>multirregión")]
+        BATCH["Azure OpenAI Batch<br/>Global o Data Zone Batch"] --> BLOB[("Blob Storage")]
+    end
+    subgraph SWC["Región secundaria (misma zona de datos si aplica residencia)"]
+        APIM2["API Management"] --> APP2["Container Apps"]
+        APIM2 --> F2["Foundry · mismo modelo y versión"]
+    end
+    AFD --> APIM1
+    AFD -. failover .-> APIM2
+    F1 -. "cuota Global Standard compartida por suscripción" .- F2

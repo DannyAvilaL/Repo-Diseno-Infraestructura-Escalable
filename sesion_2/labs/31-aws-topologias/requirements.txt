@@ -1,0 +1,3 @@
+# Versiones verificadas con las pruebas del repositorio el 2026-10-20.
+boto3==1.43.116
+python-dotenv==1.2.4

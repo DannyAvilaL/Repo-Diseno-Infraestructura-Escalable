@@ -1,0 +1,79 @@
+# Zero Trust dentro del namespace: todo denegado salvo lo explícito.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny
+  namespace: asistente
+spec:
+  podSelector: {}
+  policyTypes: ["Ingress", "Egress"]
+---
+# Solo el backend llega a Ollama.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ollama-from-backend
+  namespace: asistente
+spec:
+  podSelector:
+    matchLabels: {app: ollama}
+  policyTypes: ["Ingress"]
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels: {app: backend}
+      ports:
+        - {protocol: TCP, port: 11434}
+---
+# El backend recibe tráfico solo del controlador de ingress y sale solo a Ollama y DNS.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: backend-traffic
+  namespace: asistente
+spec:
+  podSelector:
+    matchLabels: {app: backend}
+  policyTypes: ["Ingress", "Egress"]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: ingress-nginx   # ajuste al namespace de su ingress
+      ports:
+        - {protocol: TCP, port: 8000}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels: {app: ollama}
+      ports:
+        - {protocol: TCP, port: 11434}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels: {k8s-app: kube-dns}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+---
+# Ollama necesita salida a Internet solo para descargar modelos (ollama pull).
+# En producción, precargue los pesos en el volumen y elimine esta regla.
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: ollama-egress-pull
+  namespace: asistente
+spec:
+  podSelector:
+    matchLabels: {app: ollama}
+  policyTypes: ["Egress"]
+  egress:
+    - ports:
+        - {protocol: TCP, port: 443}
+    - to:
+        - namespaceSelector: {}
+          podSelector:
+            matchLabels: {k8s-app: kube-dns}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}

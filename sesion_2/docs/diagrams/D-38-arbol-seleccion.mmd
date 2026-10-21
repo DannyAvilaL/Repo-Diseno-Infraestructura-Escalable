@@ -1,0 +1,9 @@
+%% D-38 · Árbol de decisión de la modalidad de consumo
+flowchart TD
+    Q1{"¿Alguien espera<br/>la respuesta?"} -->|sí| Q2{"¿Carga sostenida<br/>y predecible?"}
+    Q2 -->|sí| R["Reservada<br/>PTU · Provisioned Throughput · Reserved"]
+    Q2 -->|no| S["Estándar o prioritaria<br/>por solicitud"]
+    Q1 -->|no| Q3{"¿Plazo menor<br/>que 24 h?"}
+    Q3 -->|sí| F["Flex o cola propia<br/>con workers"]
+    Q3 -->|no| BT["Batch gestionado (−50 %)"]
+    X["Transversal: ¿datos restringidos? → Data Zone, regional o perfil geográfico<br/>¿modelo propio? → autogestionado"]

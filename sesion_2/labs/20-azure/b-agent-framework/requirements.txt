@@ -1,0 +1,4 @@
+# Versiones validadas el 2026-10-13 (construcción del agente y bucle con herramientas contra simulador).
+agent-framework==1.21.0
+azure-identity==1.26.0
+python-dotenv==1.2.4

@@ -1,0 +1,16 @@
+flowchart LR
+    Internet --> LB
+    subgraph VPC["Red virtual (VPC / VNet)"]
+        subgraph Pub["Subred pública"]
+            LB["Balanceador L7 + WAF"] --> GW["API Gateway"]
+        end
+        subgraph Priv["Subred privada"]
+            BE["Backend"] --> SV["Serving / GPU"]
+            BE --> VS[("Vector store")]
+        end
+        PE["Endpoint privado"]
+        NAT["NAT (salida controlada)"]
+    end
+    GW --> BE
+    BE --> PE --> API["API de modelos gestionada"]
+    Priv --> NAT --> Ext["Repositorios de paquetes"]

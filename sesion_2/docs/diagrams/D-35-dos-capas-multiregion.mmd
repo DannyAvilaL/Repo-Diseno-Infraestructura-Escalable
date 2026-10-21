@@ -1,0 +1,14 @@
+%% D-35 · Dos capas de multi-región
+flowchart TB
+    USR["Usuarios"] --> GLB["Enrutamiento global<br/>DNS o anycast"]
+    subgraph PROPIA["Capa propia · responsabilidad del cliente"]
+        GLB --> R1["Región 1: gateway + backend + datos"]
+        GLB --> R2["Región 2: gateway + backend + datos"]
+    end
+    subgraph PROV["Capa del proveedor · dentro del servicio de modelos"]
+        E1["Endpoint regional 1"] --> P1{{"Global / Data Zone (Azure)<br/>global / multirregional (Google)<br/>CRIS geográfico o global (AWS)"}}
+        E2["Endpoint regional 2"] --> P1
+        P1 --> DC["Centros de datos con capacidad"]
+    end
+    R1 --> E1
+    R2 --> E2

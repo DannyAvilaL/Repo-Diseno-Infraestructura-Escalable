@@ -1,0 +1,7 @@
+%% D-34 · Estrategias de recuperación ante desastres (AWS, Eliot 2021; equivalencias de Microsoft Foundry)
+flowchart LR
+    BR["Backup and restore<br/>(hot/cold)<br/>RTO y RPO: horas"] --> PL["Pilot light<br/>datos replicados, cómputo apagado<br/>RTO: decenas de minutos"]
+    PL --> WS["Warm standby<br/>(hot/warm)<br/>despliegue mínimo activo<br/>RTO: minutos"]
+    WS --> MS["Multi-site active/active<br/>(hot/hot)<br/>RTO y RPO cercanos a cero"]
+    NOTE["LLM gestionado: un despliegue sin tráfico no factura tokens<br/>LLM autogestionado: la GPU en espera se paga por hora"]
+    WS -.- NOTE

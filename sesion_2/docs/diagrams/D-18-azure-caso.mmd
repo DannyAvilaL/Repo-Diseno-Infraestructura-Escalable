@@ -1,0 +1,10 @@
+flowchart LR
+    U["Usuario"] --> ENTRA["Microsoft Entra ID"]
+    U --> FD["Front Door / App Gateway + WAF"] --> APIM["API Management<br/>AI gateway"] --> ACA["Container Apps<br/>backend con redundancia de zona"]
+    ACA --> FM["Microsoft Foundry<br/>Foundry Models (gpt-5-mini)"]
+    ACA --> FAS["Foundry Agent Service<br/>prompt / hosted agent (fase 2)"]
+    ACA --> SRCH[("Azure AI Search<br/>filtros de seguridad")]
+    ACA --> KV["Key Vault + identidades gestionadas"]
+    ACA -.-> CS["Content Safety / guardrails"]
+    ACA -.-> MON["Azure Monitor + Application Insights"]
+    BLOB[("Blob Storage<br/>documentos")] -. "ingesta" .-> SRCH

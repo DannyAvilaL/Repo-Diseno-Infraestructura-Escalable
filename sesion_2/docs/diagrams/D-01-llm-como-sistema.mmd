@@ -1,0 +1,16 @@
+flowchart LR
+    subgraph Almacen["Almacenamiento"]
+        W[("Archivo de pesos<br/>N parámetros × bytes")]
+    end
+    subgraph Memoria["Memoria rápida (VRAM / RAM)"]
+        WM["Pesos cargados"]
+        KV["KV cache<br/>por secuencia activa"]
+    end
+    subgraph Computo["Cómputo (GPU / CPU)"]
+        E["Motor de inferencia<br/>scheduler + kernels"]
+    end
+    IN["Tokens de entrada"] --> E
+    W -->|"carga (arranque en frío)"| WM
+    WM -->|"lectura completa por token"| E
+    E <--> KV
+    E --> OUT["Tokens de salida"]

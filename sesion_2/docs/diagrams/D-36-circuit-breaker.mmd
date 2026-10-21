@@ -1,0 +1,7 @@
+%% D-36 · Circuit breaker por región (labs/01-local-gateway/backend/app/circuit_breaker.py)
+stateDiagram-v2
+    [*] --> Cerrado
+    Cerrado --> Abierto: N fallas en la ventana\no 429 con Retry-After
+    Abierto --> Semiabierto: vence el tiempo de apertura
+    Semiabierto --> Cerrado: la solicitud de prueba tiene éxito
+    Semiabierto --> Abierto: la solicitud de prueba falla

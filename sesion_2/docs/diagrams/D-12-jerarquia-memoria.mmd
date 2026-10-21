@@ -1,0 +1,5 @@
+flowchart TB
+    R["Registros y caché del acelerador<br/>muy rápido, muy pequeño"] --> V["VRAM / HBM de la GPU<br/>alto ancho de banda: pesos + KV cache"]
+    V --> RAM["RAM del sistema<br/>más capacidad, menor ancho de banda: inferencia en CPU, offloading"]
+    RAM --> D["Disco local / volumen<br/>caché de pesos"]
+    D --> O["Almacenamiento de objetos<br/>pesos y documentos; define el arranque en frío"]

@@ -1,0 +1,13 @@
+%% D-33 · Disponibilidad compuesta (cifras hipotéticas de la Unidad B)
+flowchart LR
+    DNS["Enrutamiento global<br/>99,99 %"]
+    subgraph RA["Región A · 99,80 % en serie"]
+        GA["Gateway 99,95 %"] --> BA["Backend 99,95 %"] --> MA["Modelo 99,9 %"]
+    end
+    subgraph RB["Región B · 99,80 % en serie"]
+        GB["Gateway 99,95 %"] --> BB["Backend 99,95 %"] --> MB["Modelo 99,9 %"]
+    end
+    DNS --> RA
+    DNS --> RB
+    RES["A y B en paralelo: 1 − (1 − 0,998)² ≈ 99,9996 %<br/>con el DNS en serie: ≈ 99,99 % (4,5 min/mes)<br/>supone fallas independientes"]
+    RB -.-> RES

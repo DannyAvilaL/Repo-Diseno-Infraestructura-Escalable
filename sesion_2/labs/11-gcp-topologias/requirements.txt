@@ -1,0 +1,4 @@
+# Versiones verificadas con las pruebas del repositorio el 2026-10-20.
+google-genai==2.31.0
+google-cloud-storage==3.17.1
+python-dotenv==1.2.4

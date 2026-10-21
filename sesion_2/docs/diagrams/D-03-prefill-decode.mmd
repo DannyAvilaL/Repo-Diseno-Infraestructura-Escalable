@@ -1,0 +1,5 @@
+flowchart LR
+    P["Prefill<br/>todos los tokens de entrada en paralelo<br/>limitado por cómputo"] --> T1["Token 1"]
+    T1 --> T2["Token 2"] --> T3["Token 3"] --> Tn["Token n"]
+    P -. "duración ≈ TTFT" .- T1
+    T1 -. "intervalo ≈ TPOT" .- T2

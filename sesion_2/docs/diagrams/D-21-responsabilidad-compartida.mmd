@@ -1,0 +1,14 @@
+flowchart TB
+    subgraph Prov["Proveedor"]
+        P1["Infraestructura física y red del proveedor"]
+        P2["Plataforma gestionada y sus parches"]
+        P3["Modelo y su disponibilidad (en servicios gestionados)"]
+    end
+    subgraph Org["Organización (siempre)"]
+        O1["Identidades y permisos"]
+        O2["Clasificación y protección de datos"]
+        O3["Configuración de red"]
+        O4["Prompts, documentos y herramientas"]
+        O5["Evaluación de las respuestas"]
+    end
+    Prov --- Org

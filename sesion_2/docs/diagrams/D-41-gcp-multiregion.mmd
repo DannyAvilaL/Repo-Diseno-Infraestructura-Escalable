@@ -1,0 +1,14 @@
+%% D-41 · Caso en Google Cloud (diseño de referencia, no validado en un proyecto)
+flowchart LR
+    U["Usuarios · Identity Platform"] --> LB["Cloud Load Balancing global + Cloud Armor"]
+    subgraph USC1["us-central1"]
+        CR1["Cloud Run · backend"] --> G1["Gemini · endpoint regional o us"]
+        CR1 --> VS1[("Vector Search")]
+        CR1 --> FS[("Firestore multirregional")]
+        SCHED["Cloud Scheduler"] --> BJ["Gemini batch inference"] --> GCS[("Cloud Storage")]
+    end
+    subgraph USE4["us-east4"]
+        CR2["Cloud Run · backend"] --> G2["Gemini · endpoint regional o us"]
+    end
+    LB --> CR1
+    LB --> CR2

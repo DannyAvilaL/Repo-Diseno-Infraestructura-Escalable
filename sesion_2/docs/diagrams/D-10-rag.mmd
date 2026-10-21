@@ -1,0 +1,8 @@
+flowchart LR
+    subgraph Ingesta["Ingesta (fuera de línea, por eventos)"]
+        D[("Documentos fuente")] --> X["Extraer y dividir"] --> E1["Embeddings"] --> I[("Vector store<br/>con metadatos de permisos")]
+    end
+    subgraph Consulta["Consulta (en línea)"]
+        Q["Pregunta + identidad"] --> E2["Embedding"] --> S["Búsqueda filtrada<br/>por permisos del usuario"] --> P["Prompt con contexto"] --> M["Modelo"]
+    end
+    I --> S

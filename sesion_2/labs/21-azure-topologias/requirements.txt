@@ -1,0 +1,4 @@
+# Versiones verificadas con las pruebas del repositorio el 2026-10-20.
+openai==3.35.1
+azure-identity==1.26.0
+python-dotenv==1.2.4

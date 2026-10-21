@@ -1,0 +1,14 @@
+%% D-30 · Ciclo de vida de un trabajo batch (nombres de Azure OpenAI Batch)
+stateDiagram-v2
+    [*] --> validating
+    validating --> failed: entrada inválida (BOM, JSON, ids duplicados)
+    validating --> in_progress
+    in_progress --> finalizing
+    finalizing --> completed: resultados + archivo de errores
+    in_progress --> expired: venció la ventana (resultados parciales)
+    in_progress --> cancelling: cancelar
+    cancelling --> cancelled: resultados parciales; se factura lo procesado
+    completed --> [*]
+    failed --> [*]
+    expired --> [*]
+    cancelled --> [*]

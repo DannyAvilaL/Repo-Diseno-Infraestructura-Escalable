@@ -1,0 +1,9 @@
+flowchart LR
+    U["Usuario"] --> ID["Identidad: ____"]
+    U --> GW["Gateway: ____"] --> BE["Backend: ____"]
+    BE --> GR["Guardrails: ____"]
+    BE --> VS[("Vector store: ____")]
+    BE --> MD["Modelo / serving: ____"]
+    BE -.-> OB["Observabilidad: ____"]
+    BE -.-> SEC["Secretos / identidad de carga: ____"]
+    NOTE["SLO: ____ · Memoria o tokens/min: ____ · ADR: gestionado / autogestionado"]

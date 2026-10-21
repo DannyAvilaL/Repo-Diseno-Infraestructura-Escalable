@@ -1,0 +1,14 @@
+flowchart TB
+    LB["Balanceador regional"]
+    subgraph Z1["Zona 1"]
+        B1["Backend"] --> S1["Serving / GPU"]
+        D1[("Réplica de datos")]
+    end
+    subgraph Z2["Zona 2"]
+        B2["Backend"] --> S2["Serving / GPU"]
+        D2[("Réplica de datos")]
+    end
+    LB --> B1
+    LB --> B2
+    D1 <-. "replicación" .-> D2
+    X["Falla de la zona 1"] -. "el tráfico pasa a la zona 2" .-> Z2

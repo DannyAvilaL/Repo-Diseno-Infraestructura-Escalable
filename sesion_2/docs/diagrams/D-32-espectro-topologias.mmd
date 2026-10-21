@@ -1,0 +1,9 @@
+%% D-32 · Espectro de topologías redundantes
+flowchart LR
+    Z1["Zona única<br/>cubre: falla de host"] --> Z2["Multizona<br/>cubre: falla de zona"]
+    Z2 --> AP["Multi-región activo-pasivo<br/>cubre: falla de región<br/>RTO minutos a horas"]
+    AP --> AA["Multi-región activo-activo<br/>cubre: falla de región<br/>RTO cercano a cero"]
+    Z1 -.- C1["$"]
+    Z2 -.- C2["$$"]
+    AP -.- C3["$$–$$$"]
+    AA -.- C4["$$$"]
