@@ -1,0 +1,114 @@
+# Unidad de capacidad = 1 Pod = gateway (admisión + métricas) + Ollama (inferencia) + PVC propio.
+# StatefulSet (no Deployment) porque cada réplica necesita su propio volumen de modelos (RWO).
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: llm-inference
+  namespace: llm-inference
+  labels: {app.kubernetes.io/name: llm-inference}
+spec:
+  serviceName: llm-inference-headless
+  replicas: 1                      # KEDA toma el control (ver 50-keda-scaledobject.yaml)
+  podManagementPolicy: Parallel    # escalar más rápido: no esperar a que la réplica N-1 esté Ready
+  selector:
+    matchLabels: {app.kubernetes.io/name: llm-inference}
+  template:
+    metadata:
+      labels: {app.kubernetes.io/name: llm-inference}
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8000"
+        prometheus.io/path: /metrics
+    spec:
+      serviceAccountName: llm-inference
+      terminationGracePeriodSeconds: 120   # permitir que terminen las generaciones en curso
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        runAsGroup: 10001
+        fsGroup: 10001
+        seccompProfile: {type: RuntimeDefault}
+      initContainers:
+        # Descarga el modelo al PVC la primera vez. Requiere egress 443 (ver 40-networkpolicy.yaml).
+        - name: model-pull
+          image: ollama/ollama:latest      # FIJAR versión/digest en producción
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -e
+              ollama serve >/tmp/serve.log 2>&1 &
+              for i in $(seq 1 30); do ollama list >/dev/null 2>&1 && break; sleep 1; done
+              ollama pull "$MODEL"
+              kill %1 || true
+          env:
+            - {name: MODEL, value: "llama3.2:1b"}
+            - {name: OLLAMA_MODELS, value: /models}
+            - {name: HOME, value: /tmp}
+          volumeMounts:
+            - {name: models, mountPath: /models}
+            - {name: tmp, mountPath: /tmp}
+          securityContext: &sc
+            allowPrivilegeEscalation: false
+            capabilities: {drop: ["ALL"]}
+      containers:
+        - name: ollama
+          image: ollama/ollama:latest      # FIJAR versión/digest en producción
+          env:
+            - {name: OLLAMA_HOST, value: "127.0.0.1:11434"}   # solo accesible dentro del Pod
+            - {name: OLLAMA_MODELS, value: /models}
+            - {name: OLLAMA_NUM_PARALLEL, value: "2"}
+            - {name: OLLAMA_MAX_LOADED_MODELS, value: "1"}
+            - {name: OLLAMA_KEEP_ALIVE, value: "-1"}          # no descargar el modelo de memoria
+            - {name: HOME, value: /tmp}
+          resources:
+            requests: {cpu: "2", memory: 4Gi}
+            limits: {memory: 6Gi}          # sin límite de CPU: evita throttling del cómputo de inferencia
+          volumeMounts:
+            - {name: models, mountPath: /models}
+            - {name: tmp, mountPath: /tmp}
+          startupProbe:                    # carga de modelo lenta: no matar el Pod al arrancar
+            httpGet: {host: 127.0.0.1, path: /api/tags, port: 11434}
+            periodSeconds: 5
+            failureThreshold: 60
+          securityContext: *sc
+        - name: gateway
+          image: REPLACE_ME/llm-gateway:1.0.0   # kustomize: ver kustomization.yaml (images:)
+          ports:
+            - {name: http, containerPort: 8000}
+          env:
+            - {name: GW_OLLAMA_BASE_URL, value: "http://127.0.0.1:11434"}
+            - {name: GW_MODEL, value: "llama3.2:1b"}
+            - {name: GW_MAX_CONCURRENCY, value: "2"}     # = OLLAMA_NUM_PARALLEL
+            - {name: GW_MAX_QUEUE, value: "20"}
+            - {name: GW_QUEUE_TIMEOUT_S, value: "30"}
+            - name: GW_API_KEY
+              valueFrom:
+                secretKeyRef: {name: gateway-secrets, key: api-key, optional: true}
+          resources:
+            requests: {cpu: 100m, memory: 128Mi}
+            limits: {memory: 256Mi}
+          readinessProbe:      # Ready solo si el modelo está en el volumen: el Service no envía tráfico antes
+            httpGet: {path: /readyz, port: http}
+            periodSeconds: 5
+            failureThreshold: 3
+          livenessProbe:       # independiente de Ollama: evita reinicios en cascada
+            httpGet: {path: /healthz, port: http}
+            periodSeconds: 10
+            failureThreshold: 3
+          lifecycle:
+            preStop:
+              exec: {command: ["/bin/sleep", "15"]}   # dar tiempo a que el endpoint salga del balanceador
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities: {drop: ["ALL"]}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata: {name: models}
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        # storageClassName: premium-rwo      # elegir una clase SSD/NVMe del proveedor
+        resources:
+          requests: {storage: 20Gi}

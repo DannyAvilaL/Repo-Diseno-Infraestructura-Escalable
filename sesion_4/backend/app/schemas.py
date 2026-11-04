@@ -1,0 +1,34 @@
+from typing import Literal
+
+from pydantic import BaseModel, Field
+
+
+class Message(BaseModel):
+    role: Literal["system", "user", "assistant"]
+    content: str = Field(min_length=1, max_length=16_000)
+
+
+class ChatRequest(BaseModel):
+    messages: list[Message] = Field(min_length=1, max_length=50)
+    stream: bool = False
+    max_tokens: int = Field(default=256, ge=1, le=2048)
+    temperature: float = Field(default=0.2, ge=0.0, le=2.0)
+
+
+class Usage(BaseModel):
+    input_tokens: int
+    output_tokens: int
+
+
+class Timings(BaseModel):
+    queue_wait_s: float
+    ttft_s: float | None
+    tpot_s: float | None
+    e2e_s: float
+
+
+class ChatResponse(BaseModel):
+    model: str
+    content: str
+    usage: Usage
+    timings: Timings

@@ -1,0 +1,7 @@
+# Runtime del gateway (Python 3.12). Versiones mínimas probadas el 2026-11-03.
+fastapi>=0.115
+uvicorn[standard]>=0.30
+httpx>=0.27
+pydantic>=2.8
+pydantic-settings>=2.4
+prometheus-client>=0.20

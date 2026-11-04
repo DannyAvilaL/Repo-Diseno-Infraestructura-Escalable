@@ -1,0 +1,11 @@
+# Para clústeres con Prometheus Operator / kube-prometheus-stack / Azure Managed Prometheus / GMP.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: llm-inference
+  namespace: llm-inference
+spec:
+  selector:
+    matchLabels: {app.kubernetes.io/name: llm-inference}
+  podMetricsEndpoints:
+    - {port: http, path: /metrics, interval: 15s}

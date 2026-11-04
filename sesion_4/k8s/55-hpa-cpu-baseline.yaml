@@ -1,0 +1,13 @@
+# LÍNEA BASE DIDÁCTICA (anti-patrón para LLM). No aplicar junto con el ScaledObject (ambos gestionan un HPA).
+# Se incluye para el ejercicio de comparación: el CPU de inferencia sube de inmediato a ~100% con 1 sola
+# solicitud en CPU-only, y en GPU el CPU casi no refleja la saturación del acelerador ni la cola.
+apiVersion: autoscaling/v2
+kind: HorizontalPodAutoscaler
+metadata: {name: llm-inference-cpu, namespace: llm-inference}
+spec:
+  scaleTargetRef: {apiVersion: apps/v1, kind: StatefulSet, name: llm-inference}
+  minReplicas: 1
+  maxReplicas: 4
+  metrics:
+    - type: Resource
+      resource: {name: cpu, target: {type: Utilization, averageUtilization: 70}}

@@ -1,0 +1,33 @@
+# Autoscaling horizontal por PROFUNDIDAD DE COLA (señal de demanda insatisfecha), no por CPU.
+# Requisitos: KEDA instalado + Prometheus que raspe los Pods (annotations o PodMonitor, ver monitoring/).
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: llm-inference
+  namespace: llm-inference
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: StatefulSet
+    name: llm-inference
+  minReplicaCount: 1          # 0 implicaría cold start de minutos (descarga/carga del modelo): ver docs
+  maxReplicaCount: 4          # techo por presupuesto / cuota de GPU
+  pollingInterval: 15
+  cooldownPeriod: 300
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          policies: [{type: Pods, value: 2, periodSeconds: 60}]
+        scaleDown:
+          stabilizationWindowSeconds: 300     # evita "flapping": escalar abajo es lento a propósito
+          policies: [{type: Pods, value: 1, periodSeconds: 120}]
+  triggers:
+    - type: prometheus
+      metricType: AverageValue
+      metadata:
+        serverAddress: http://prometheus-operated.monitoring.svc:9090   # AJUSTAR a su Prometheus
+        query: sum(llm_gateway_queue_depth{namespace="llm-inference"})
+        threshold: "4"             # ~4 solicitudes en cola por réplica: derivar de la prueba de carga
+        activationThreshold: "1"

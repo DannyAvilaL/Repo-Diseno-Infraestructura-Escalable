@@ -1,0 +1,18 @@
+# Variante GPU con Device Plugin clásico (nvidia.com/gpu). Requiere NVIDIA GPU Operator o
+# drivers + container toolkit + device plugin en los nodos GPU.
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+resources: [../..]
+patches:
+  - target: {kind: StatefulSet, name: llm-inference}
+    patch: |-
+      - op: add
+        path: /spec/template/spec/containers/0/resources/limits/nvidia.com~1gpu
+        value: 1
+      - op: add
+        path: /spec/template/spec/nodeSelector
+        value: {workload: gpu-inference}          # etiquetar el pool GPU con esta clave
+      - op: add
+        path: /spec/template/spec/tolerations
+        value:
+          - {key: nvidia.com/gpu, operator: Exists, effect: NoSchedule}   # los pools GPU suelen tener este taint

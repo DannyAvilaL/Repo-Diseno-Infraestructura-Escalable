@@ -1,0 +1,31 @@
+# EJEMPLO DIDÁCTICO - Dynamic Resource Allocation (DRA). API resource.k8s.io/v1 (GA desde Kubernetes 1.34).
+# NO validado en un clúster por el autor del material: verifique campos con la documentación de su versión
+# y del driver (NVIDIA DRA Driver for GPUs) antes de usar. No combinar DRA y device plugin en el mismo nodo.
+apiVersion: resource.k8s.io/v1
+kind: ResourceClaimTemplate
+metadata:
+  name: single-gpu
+  namespace: llm-inference
+spec:
+  spec:
+    devices:
+      requests:
+        - name: gpu
+          exactly:
+            deviceClassName: gpu.nvidia.com      # DeviceClass instalada por el driver
+            count: 1
+            selectors:
+              - cel:
+                  # Ejemplo: exigir >= 16 GiB de VRAM. El nombre del atributo depende del driver.
+                  expression: 'device.capacity["gpu.nvidia.com"].memory.compareTo(quantity("16Gi")) >= 0'
+---
+# Fragmento del Pod (no es un manifiesto completo):
+#   spec:
+#     resourceClaims:
+#       - name: gpu
+#         resourceClaimTemplateName: single-gpu
+#     containers:
+#       - name: ollama
+#         resources:
+#           claims:
+#             - name: gpu

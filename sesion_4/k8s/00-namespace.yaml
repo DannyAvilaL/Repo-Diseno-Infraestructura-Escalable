@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-inference
+  labels:
+    app.kubernetes.io/part-of: llm-infra-sesion-04
+    # Pod Security Standards: "baseline" porque el contenedor de Ollama necesita escribir en volumen.
+    pod-security.kubernetes.io/enforce: baseline
+    pod-security.kubernetes.io/warn: restricted

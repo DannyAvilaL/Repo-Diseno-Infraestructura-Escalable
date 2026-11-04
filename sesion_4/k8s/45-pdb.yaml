@@ -1,0 +1,7 @@
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata: {name: llm-inference, namespace: llm-inference}
+spec:
+  maxUnavailable: 1     # drenajes de nodo: una réplica a la vez
+  selector:
+    matchLabels: {app.kubernetes.io/name: llm-inference}

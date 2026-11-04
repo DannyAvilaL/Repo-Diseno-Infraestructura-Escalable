@@ -1,0 +1,4 @@
+autogen-agentchat>=0.7
+autogen-ext[openai,azure]>=0.7
+azure-identity
+python-dotenv

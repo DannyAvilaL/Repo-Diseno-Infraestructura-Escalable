@@ -1,0 +1,3 @@
+google-adk>=1.0
+python-dotenv>=1.0
+google-cloud-aiplatform[agent_engines]>=1.100   # solo si despliega en Agent Engine

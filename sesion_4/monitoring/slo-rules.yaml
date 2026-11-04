@@ -1,0 +1,26 @@
+# SLIs/SLOs de ejemplo (PrometheusRule). Los umbrales son SUPUESTOS ACADÉMICOS del caso universitario.
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata: {name: llm-slo, namespace: llm-inference}
+spec:
+  groups:
+    - name: llm-slis
+      rules:
+        - record: llm:ttft_seconds:p95_5m
+          expr: histogram_quantile(0.95, sum by (le) (rate(llm_gateway_ttft_seconds_bucket[5m])))
+        - record: llm:availability:ratio_5m      # SLI de disponibilidad: no cuenta 429 como fallo (load shedding intencional)
+          expr: |
+            sum(rate(llm_gateway_requests_total{outcome="ok"}[5m]))
+            / clamp_min(sum(rate(llm_gateway_requests_total[5m])) , 1e-9)
+    - name: llm-alerts
+      rules:
+        - alert: LLMTTFTAltoP95
+          expr: llm:ttft_seconds:p95_5m > 2          # SLO supuesto: p95 TTFT < 2 s
+          for: 10m
+          labels: {severity: warning}
+          annotations: {summary: "TTFT p95 por encima del SLO"}
+        - alert: LLMRechazosSostenidos
+          expr: sum(rate(llm_gateway_rejected_total[5m])) > 0
+          for: 5m
+          labels: {severity: warning}
+          annotations: {summary: "Hay load shedding sostenido: capacidad insuficiente o maxReplicas alcanzado"}

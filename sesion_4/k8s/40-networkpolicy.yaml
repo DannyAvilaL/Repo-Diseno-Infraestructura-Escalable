@@ -1,0 +1,48 @@
+# Zero Trust de red: denegar todo y abrir lo mínimo necesario.
+# Requiere un CNI que implemente NetworkPolicy (Calico, Cilium, Azure NPM, GKE Dataplane V2, etc.).
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: default-deny-all, namespace: llm-inference}
+spec:
+  podSelector: {}
+  policyTypes: [Ingress, Egress]
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-ingress-controller-and-monitoring, namespace: llm-inference}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: llm-inference}
+  policyTypes: [Ingress]
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: ingress-nginx}
+      ports: [{protocol: TCP, port: 8000}]
+    - from:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: monitoring}
+      ports: [{protocol: TCP, port: 8000}]     # scrape de /metrics
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata: {name: allow-dns-and-model-registry-egress, namespace: llm-inference}
+spec:
+  podSelector:
+    matchLabels: {app.kubernetes.io/name: llm-inference}
+  policyTypes: [Egress]
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels: {kubernetes.io/metadata.name: kube-system}
+      ports:
+        - {protocol: UDP, port: 53}
+        - {protocol: TCP, port: 53}
+    # Solo para la descarga inicial del modelo (initContainer). NetworkPolicy no filtra por FQDN:
+    # en producción, pre-cargar modelos desde almacenamiento de objetos privado (ver docs/arquitectura.md)
+    # y ELIMINAR esta regla, o usar un firewall/proxy con allowlist de FQDN.
+    - to:
+        - ipBlock:
+            cidr: 0.0.0.0/0
+            except: [10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.169.254/32]   # sin acceso a metadatos cloud
+      ports: [{protocol: TCP, port: 443}]

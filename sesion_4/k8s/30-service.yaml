@@ -1,0 +1,44 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-gateway
+  namespace: llm-inference
+spec:
+  type: ClusterIP
+  selector: {app.kubernetes.io/name: llm-inference}
+  ports:
+    - {name: http, port: 80, targetPort: http}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-inference-headless
+  namespace: llm-inference
+spec:
+  clusterIP: None
+  selector: {app.kubernetes.io/name: llm-inference}
+  ports:
+    - {name: http, port: 8000}
+---
+# Ingress L7: balancea por SOLICITUD (no por conexión) y soporta streaming SSE.
+# Requiere un Ingress Controller (aquí ingress-nginx). Ajuste host y TLS (cert-manager o secreto TLS).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: llm-gateway
+  namespace: llm-inference
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-buffering: "off"        # SSE: no acumular tokens
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "300"     # generaciones largas
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "300"
+    nginx.ingress.kubernetes.io/load-balance: ewma            # favorece el backend con menor latencia
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: llm.example.edu           # REEMPLAZAR
+      http:
+        paths:
+          - {path: /, pathType: Prefix, backend: {service: {name: llm-gateway, port: {name: http}}}}
+  # tls:
+  #   - hosts: [llm.example.edu]
+  #     secretName: llm-tls

@@ -1,0 +1,62 @@
+# Laboratorio local: Ollama + gateway + frontend. Ejecutar desde la raíz del repo.
+#   docker compose up -d --build
+#   docker compose --profile setup run --rm model-pull     # descarga el modelo al volumen (requiere Internet)
+# Para GPU NVIDIA: docker compose --profile gpu up (requiere NVIDIA Container Toolkit)
+services:
+  ollama:
+    image: ollama/ollama:latest   # fije una versión concreta en producción
+    environment:
+      OLLAMA_NUM_PARALLEL: "2"
+      OLLAMA_MAX_LOADED_MODELS: "1"
+      OLLAMA_KEEP_ALIVE: "30m"
+    volumes:
+      - ollama-models:/root/.ollama      # volumen persistente: los modelos pesan GB
+    networks: [backend]                   # sin puertos publicados: solo el gateway le habla
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  # Descarga puntual del modelo. Vive en una red con salida a Internet; el servidor de
+  # inferencia permanente NO la tiene (egress cerrado). Ambos comparten el volumen.
+  model-pull:
+    image: ollama/ollama:latest
+    profiles: ["setup"]
+    entrypoint: ["/bin/sh", "-c"]
+    command: ["ollama serve & sleep 6 && ollama pull ${GW_MODEL:-llama3.2:1b}"]
+    volumes:
+      - ollama-models:/root/.ollama
+    networks: [frontend]
+
+  gateway:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    environment:
+      GW_OLLAMA_BASE_URL: http://ollama:11434
+      GW_MODEL: ${GW_MODEL:-llama3.2:1b}
+      GW_MAX_CONCURRENCY: "2"
+      GW_MAX_QUEUE: "20"
+      GW_CORS_ORIGINS: '["http://localhost:5173","http://localhost:8080"]'
+    ports:
+      - "8000:8000"
+    depends_on:
+      ollama:
+        condition: service_healthy
+    networks: [backend, frontend]
+
+  web:
+    build: ./frontend
+    ports:
+      - "8080:80"
+    depends_on: [gateway]
+    networks: [frontend]
+
+networks:
+  backend:
+    internal: true     # sin salida a Internet: segmentación de red
+  frontend: {}
+
+volumes:
+  ollama-models: {}
