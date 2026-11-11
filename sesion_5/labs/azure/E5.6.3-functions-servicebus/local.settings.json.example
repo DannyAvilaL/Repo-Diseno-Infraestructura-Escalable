@@ -1,0 +1,11 @@
+{
+  "IsEncrypted": false,
+  "Values": {
+    "FUNCTIONS_WORKER_RUNTIME": "python",
+    "AzureWebJobsStorage": "UseDevelopmentStorage=true",
+    "ServiceBusConnection__fullyQualifiedNamespace": "<namespace>.servicebus.windows.net",
+    "AZURE_OPENAI_ENDPOINT": "https://<recurso>.openai.azure.com/",
+    "AZURE_OPENAI_DEPLOYMENT": "<deployment>",
+    "AZURE_OPENAI_API_VERSION": "<api-version-vigente>"
+  }
+}

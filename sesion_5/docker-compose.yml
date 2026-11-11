@@ -1,0 +1,23 @@
+# Perfiles: por defecto gateway+web con proveedor mock.
+# `docker compose --profile ollama up` agrega Ollama (CPU) y usa SLLM_PROVIDER=ollama.
+services:
+  gateway:
+    build: .
+    environment:
+      SLLM_ENV: local
+      SLLM_PROVIDER: ${SLLM_PROVIDER:-mock}
+      SLLM_OLLAMA_BASE_URL: http://ollama:11434
+      SLLM_OLLAMA_MODEL: ${SLLM_OLLAMA_MODEL:-llama3.2:1b}
+      SLLM_API_KEYS: ${SLLM_API_KEYS:-dev-key-change-me:tenant-a}
+    ports: ["8000:8000"]
+  web:
+    build: ./frontend
+    ports: ["8080:80"]
+    depends_on: [gateway]
+  ollama:
+    profiles: ["ollama"]
+    image: ollama/ollama:latest
+    ports: ["11434:11434"]
+    volumes: ["ollama:/root/.ollama"]
+volumes:
+  ollama:

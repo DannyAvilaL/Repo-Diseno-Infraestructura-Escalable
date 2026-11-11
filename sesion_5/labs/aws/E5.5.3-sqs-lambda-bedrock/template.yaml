@@ -1,0 +1,98 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: E5.5.3 - Orquestacion serverless de inferencia SQS -> Lambda -> Bedrock Converse (con DLQ)
+
+Parameters:
+  ModelId:
+    Type: String
+    Description: ID del modelo o inference profile habilitado en TU cuenta/region (ver consola Bedrock > Model access)
+  MaxReceiveCount:
+    Type: Number
+    Default: 3
+
+Globals:
+  Function:
+    Runtime: python3.12
+    Timeout: 60
+    MemorySize: 512
+    Architectures: [arm64]
+
+Resources:
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      MessageRetentionPeriod: 1209600
+      SqsManagedSseEnabled: true
+
+  JobsQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      # Regla: VisibilityTimeout >= 6 x Timeout de la funcion (recomendacion AWS para ESM de SQS)
+      VisibilityTimeout: 360
+      SqsManagedSseEnabled: true
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: !Ref MaxReceiveCount
+
+  ResultsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions: [{AttributeName: job_id, AttributeType: S}]
+      KeySchema: [{AttributeName: job_id, KeyType: HASH}]
+      TimeToLiveSpecification: {AttributeName: expires_at, Enabled: true}
+      SSESpecification: {SSEEnabled: true}
+
+  WorkerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: worker.handler
+      SnapStart: {ApplyOn: PublishedVersions}   # mitigacion de cold start (Python 3.12+)
+      AutoPublishAlias: live
+      Environment:
+        Variables:
+          MODEL_ID: !Ref ModelId
+          TABLE_NAME: !Ref ResultsTable
+          MAX_PROMPT_CHARS: "4000"
+      Policies:
+        - DynamoDBCrudPolicy: {TableName: !Ref ResultsTable}
+        - Statement:   # minimo privilegio: solo Converse (no InvokeModel*)
+            - Effect: Allow
+              Action: [bedrock:InvokeModel]
+              Resource: "*"   # Converse se autoriza con bedrock:InvokeModel; restringe al ARN del modelo en produccion
+      Events:
+        Jobs:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt JobsQueue.Arn
+            BatchSize: 5
+            FunctionResponseTypes: [ReportBatchItemFailures]   # partial batch response
+            ScalingConfig: {MaximumConcurrency: 5}             # backpressure hacia Bedrock
+
+  SubmitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: src/
+      Handler: submit.handler
+      Timeout: 10
+      Environment:
+        Variables: {QUEUE_URL: !Ref JobsQueue, TABLE_NAME: !Ref ResultsTable}
+      Policies:
+        - SQSSendMessagePolicy: {QueueName: !GetAtt JobsQueue.QueueName}
+        - DynamoDBCrudPolicy: {TableName: !Ref ResultsTable}
+      Events:
+        Api:
+          Type: HttpApi
+          Properties: {Path: /jobs, Method: POST}
+        Get:
+          Type: HttpApi
+          Properties: {Path: "/jobs/{job_id}", Method: GET}
+
+Outputs:
+  ApiUrl:
+    Value: !Sub "https://${ServerlessHttpApi}.execute-api.${AWS::Region}.amazonaws.com"
+  QueueUrl:
+    Value: !Ref JobsQueue
+  DlqUrl:
+    Value: !Ref DeadLetterQueue

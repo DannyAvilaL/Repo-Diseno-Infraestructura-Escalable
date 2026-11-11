@@ -1,0 +1,41 @@
+[project]
+name = "serverless-llm-gateway"
+version = "1.0.0"
+description = "Sesión 5 - Patrones serverless para LLMs (Diseño de Infraestructura Escalable para LLMs)"
+requires-python = ">=3.12"
+readme = "README.md"
+license = { text = "MIT" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-q"
+filterwarnings = ["ignore:Using .httpx. with .starlette.testclient.:Warning"]
+
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM", "ASYNC", "S"]
+ignore = ["S101", "S311"]
+
+[tool.ruff.lint.per-file-ignores]
+"labs/**" = ["E501","I001","S","B","UP","SIM"]
+"experiments/**" = ["E501","I001","S"]
+"loadtest/**" = ["E501"]
+"tests/*" = ["S105", "S106"]
+"experiments/*" = ["S101"]
+"loadtest/*" = ["S101"]
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"

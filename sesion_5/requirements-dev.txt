@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest==9.1.1
+pytest-asyncio==1.4.1.post1
+ruff==0.17.4
+mypy==2.3.1
+# Opcional para carga con UI web: pip install locust
