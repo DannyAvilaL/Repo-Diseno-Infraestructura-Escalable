@@ -1,6 +1,6 @@
 # Sesión 5 · Implementación de Arquitecturas Serverless para LLMs
 
-Curso **Diseño de Infraestructura Escalable para LLMs** (Maestría, Universidad EAN). Repositorio de la sesión: gateway FastAPI con semántica serverless, frontend React, laboratorios local (Ollama) y en AWS, Azure y Google Cloud, y documentación arquitectónica.
+Curso **Diseño de Infraestructura Escalable para LLMs** (Maestría, BSG Intitute). Repositorio de la sesión: gateway FastAPI con semántica serverless, frontend React, laboratorios local (Ollama) y en AWS, Azure y Google Cloud, y documentación arquitectónica.
 Licencias: código MIT; materiales académicos CC BY-SA 4.0 (ver `LICENSE`).
 
 > **Honestidad de verificación:** lo que se ejecutó y lo que sigue pendiente está en [`docs/verificacion.md`](docs/verificacion.md). Ningún laboratorio cloud se ejecutó contra una cuenta real durante la preparación.
